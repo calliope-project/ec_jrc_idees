@@ -1,0 +1,31 @@
+[project]
+name = "ec_jrc_idees"
+version = "0.1.0"
+description = "Easy JRC-IDEES data!"
+authors = [{name = "Ivan Ruiz Manuel", email = "72193617+irm-codebase@users.noreply.github.com"}]
+requires-python = ">= 3.11"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest", "mypy", "ruff"]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.pixi.project]
+channels = ["conda-forge"]
+platforms = ["win-64", "linux-64", "osx-64", "osx-arm64"]
+
+[tool.pixi.pypi-dependencies]
+ec_jrc_idees = { path = ".", editable = true }
+
+[tool.pixi.tasks]
+
+[tool.pixi.dependencies]
+pandas = ">=2.2.2,<3"
+
+# Environments
+[tool.pixi.environments]
+default = { solve-group = "default" }
+test = { features = ["test"], solve-group = "default" }
