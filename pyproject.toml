@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Easy JRC-IDEES data!"
 authors = [{name = "Ivan Ruiz Manuel", email = "72193617+irm-codebase@users.noreply.github.com"}]
 requires-python = ">= 3.11"
-dependencies = []
+dependencies = ["styleframe>=4.2,<5"]
 
 [project.optional-dependencies]
 test = ["pytest", "mypy", "ruff"]
@@ -32,11 +32,17 @@ ec_jrc_idees = { path = ".", editable = true }
 
 [tool.pixi.dependencies]
 pandas = ">=2.2.2,<3"
+pycountry = ">=24.6.1,<25"
+xarray = ">=2024.7.0,<2025"
+pandas-stubs = ">=2.2.2.240805,<3"
 
 # Environments
 [tool.pixi.environments]
 default = { solve-group = "default" }
 test = { features = ["test"], solve-group = "default" }
+
+[tool.pixi.feature.test.dependencies]
+ipykernel = ">=6.29.5,<7"
 
 [tool.ruff]
 target-version = "py311"
