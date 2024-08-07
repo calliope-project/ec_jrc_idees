@@ -6,10 +6,7 @@ from pathlib import Path
 import yaml
 
 FILES = typing.Literal[
-    "EmissionBalance",
-    "EnergyBalance",
     "Industry",
-    "Macro",
     "PowerGen",
     "Residential",
     "Tertiary",
@@ -47,11 +44,12 @@ MC = typing.Literal[
     "EU27",
 ]
 
-config_path = Path("ec_jrc_idees/resources/")
+__cnf_path = Path("ec_jrc_idees/config/")
 
-CONFIG = yaml.safe_load((config_path / "config.yaml").read_text())
+SHEETS = {}
 for file in list(typing.get_args(FILES)):
-    CONFIG[file] = yaml.safe_load((config_path / f"config_{file}.yaml").read_text())
+    SHEETS[file] = yaml.safe_load(
+        (__cnf_path / "files" / f"{file}.yaml").read_text()
+    )
 
-
-IDEES_CONFIG = yaml.safe_load(Path("ec_jrc_idees/resources/config.yaml").read_text())
+CONFIG = yaml.safe_load((__cnf_path / "config.yaml").read_text())

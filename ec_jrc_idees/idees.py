@@ -10,7 +10,7 @@ from ec_jrc_idees.utils import config
 class EasyIDEES:
     """Main JRC-IDES handler."""
 
-    _config = config.CONFIG
+    _config = config.SHEETS
 
     def __init__(self, path: str | Path) -> None:
         self._raw_path: Path = Path(path)
@@ -29,7 +29,7 @@ class EasyIDEES:
         cleaned_df = (
             pd.read_excel(filepath, sheet_name=sheet)
             .dropna(how="all", axis=1)
-            .dropna(how="all", subset=self._config["code_column"])
+            .dropna(how="all", subset=self._config["code_col"])
         )
         cleaned_df = cleaned_df.rename(columns={cleaned_df.columns[0]: "IDEES text"})
         return cleaned_df

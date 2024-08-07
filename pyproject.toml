@@ -37,6 +37,7 @@ xarray = ">=2024.7.0,<2025"
 pandas-stubs = ">=2.2.2.240805,<3"
 pyyaml = ">=6.0.1,<7"
 types-pyyaml = ">=6.0.12.20240724,<7"
+inflection = ">=0.5.1,<0.6"
 
 # Environments
 [tool.pixi.environments]

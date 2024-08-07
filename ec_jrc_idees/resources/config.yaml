@@ -1,7 +1,0 @@
-url: "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/JRC-IDEES/JRC-IDEES-2021_v1/"
-code_column: "Code"
-standard_tidy_columns: [variable, unit, ms]
-units:
-variables:
-  FEC: final energy consumption
-
