@@ -4,9 +4,9 @@ from pathlib import Path
 
 import yaml
 
-SUPPORTED_FILES = ("Transport")
+SUPPORTED_FILES = {"Transport"}
 
-SUPPORTED_MC = (
+SUPPORTED_MC = {
     "BE",
     "BG",
     "CZ",
@@ -34,14 +34,13 @@ SUPPORTED_MC = (
     "SK",
     "FI",
     "SE",
-)
+}
 
-__cnf_path = Path("ec_jrc_idees/config/")
+SUPPORTED_YEARS = {2021}
 
-SHEET_CNF = {}
+__here = Path(__file__).parent
+CNF = yaml.safe_load((__here / "files/config.yaml").read_text())
 for file in SUPPORTED_FILES:
-    SHEET_CNF[file] = yaml.safe_load(
-        (__cnf_path / "files" / f"{file}.yaml").read_text()
-    )
+    CNF[file] = yaml.safe_load((__here / f"files/{file}.yaml").read_text())
 
-CNF = yaml.safe_load((__cnf_path / "config.yaml").read_text())
+

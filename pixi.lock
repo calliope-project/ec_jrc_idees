@@ -964,7 +964,7 @@ packages:
   name: ec-jrc-idees
   version: 0.1.0
   path: .
-  sha256: 1cec209ac5f48381e70c622845e872cb2cc848e9687d6b1d81ff80ae9a797233
+  sha256: 6d52c3f3571f9ac2e7c0507d297f44492a797ccb59fbe23a3b4a2b157aa359a8
   requires_dist:
   - styleframe>=4.2,<5
   - pytest ; extra == 'test'

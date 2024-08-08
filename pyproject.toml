@@ -52,14 +52,14 @@ target-version = "py311"
 builtins = ["snakemake"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "Q", "W", "D", "PT", "PL", "PD", "C90"]
+select = ["E", "F", "I", "Q", "W", "D", "PT", "PL", "PD", "C90", "UP"]
 
 [tool.ruff.lint.isort]
 split-on-trailing-comma = false
 
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["E402", "D104"]
 "*.ipynb" = ["E402"]
+"test/**" =["D"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
