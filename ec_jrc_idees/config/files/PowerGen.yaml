@@ -1,4 +1,0 @@
-Thermal_CHP:
-  drop_rows:
-    from: 86
-    to: 102

@@ -1,19 +1,12 @@
 """General IDEES configuration and quality of life stuff."""
 
-import typing
 from pathlib import Path
 
 import yaml
 
-FILES = typing.Literal[
-    "Industry",
-    "PowerGen",
-    "Residential",
-    "Tertiary",
-    "Transport",
-]
+SUPPORTED_FILES = ("Transport")
 
-MC = typing.Literal[
+SUPPORTED_MC = (
     "BE",
     "BG",
     "CZ",
@@ -41,15 +34,14 @@ MC = typing.Literal[
     "SK",
     "FI",
     "SE",
-    "EU27",
-]
+)
 
 __cnf_path = Path("ec_jrc_idees/config/")
 
-SHEETS = {}
-for file in list(typing.get_args(FILES)):
-    SHEETS[file] = yaml.safe_load(
+SHEET_CNF = {}
+for file in SUPPORTED_FILES:
+    SHEET_CNF[file] = yaml.safe_load(
         (__cnf_path / "files" / f"{file}.yaml").read_text()
     )
 
-CONFIG = yaml.safe_load((__cnf_path / "config.yaml").read_text())
+CNF = yaml.safe_load((__cnf_path / "config.yaml").read_text())

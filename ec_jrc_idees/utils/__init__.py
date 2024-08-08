@@ -1,4 +1,4 @@
-from ec_jrc_idees.utils.config import SHEETS
-from ec_jrc_idees.utils.sheet import Sheet
+from ec_jrc_idees.utils.config import CNF, SHEET_CNF
+from ec_jrc_idees.utils.preprocess import CleanSheet
 
-__all__ = ["SHEETS", "Sheet"]
+__all__ = ["CNF", "SHEET_CNF", "CleanSheet"]
