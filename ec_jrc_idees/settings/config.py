@@ -40,7 +40,8 @@ SUPPORTED_YEARS = {2021}
 
 __here = Path(__file__).parent
 CNF = yaml.safe_load((__here / "files/config.yaml").read_text())
+CNF["files"] = {}
 for file in SUPPORTED_FILES:
-    CNF[file] = yaml.safe_load((__here / f"files/{file}.yaml").read_text())
+    CNF["files"][file] = yaml.safe_load((__here / f"files/{file}.yaml").read_text())
 
 
