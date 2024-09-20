@@ -1,4 +1,13 @@
 url: "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/JRC-IDEES/JRC-IDEES-2021_v1/"
-code_col: "Code"
-file_col: "idees_file"
-standard_cols: [variable, units, ms, sector, subsector, process, tech_or_enduse, fuel]
+years:
+  min: 2000
+  max: 2050
+carriers:
+  - Gasoline
+  - BioGasoline
+  - Diesel oil
+  - BioDiesel oil
+  - Electricity
+  - LPG
+  - Natural Gas
+  - BioNatural Gas

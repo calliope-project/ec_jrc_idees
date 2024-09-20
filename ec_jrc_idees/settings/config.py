@@ -45,3 +45,16 @@ for file in SUPPORTED_FILES:
     CNF["files"][file] = yaml.safe_load((__here / f"files/{file}.yaml").read_text())
 
 
+def tidy_columns_cnf(
+    file: str, sheet: str | None = None, section: str | None = None
+) -> dict[str, str]:
+    """Return a dictionary with the tidy columns configured."""
+    txt = "tidy_columns"
+
+    tidy = CNF["files"][file][txt]
+    if sheet:
+        tidy |= CNF["files"][file]["sheets"][sheet][txt]
+        if section:
+            tidy |= CNF["files"][file]["sheets"][sheet]["sections"][section][txt]
+
+    return tidy

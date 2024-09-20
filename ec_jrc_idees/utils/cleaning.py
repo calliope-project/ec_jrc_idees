@@ -19,6 +19,6 @@ def get_code_cols(data:pd.DataFrame, column_names: list[str]) -> pd.DataFrame:
     return pd.concat([tidy_df, data], axis=1)
 
 
-def get_excel_row_range(data: pd.DataFrame, row_range: tuple[int, int]):
+def get_excel_row_slice(row_range: tuple[int, int]):
     """Get a dataframe section based on excel numbers."""
-    return data.loc[slice(row_range[0]-2, row_range[1]-1)].copy()
+    return slice(row_range[0]-2, row_range[1]-1)

@@ -1,8 +1,15 @@
-
+tidy_columns:
+  idees_section: "Transport"
 sheets:
   TrRoad_ene:
+    tidy_columns:
+      transport_category:         # passenger, freight, maritime_bunker
+      transport_subcategory: Road
     sections:
       TotalEnergyConsumption:
-
-
-
+        tidy_columns:
+          vehicle_type:        # cars, motorcyles, etc
+          vehicle_subtype:     # ICE_gasoline, BEV, P-HEV
+          carrier:
+          variable: TotalEnergyConsumption
+          unit: ktoe

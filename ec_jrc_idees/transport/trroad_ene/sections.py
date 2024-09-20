@@ -12,4 +12,11 @@ class TotalEnergyConsumption(IDEESSection):
 
     EXCEL_ROW_RANGE = (17, 56)
 
+    def process(self):
+        passenger_transport = ()
+        total = self.data.iloc[0,1:].sum()
+        years = self.data.columns[1:]
+        return super().process()
+
+
 
