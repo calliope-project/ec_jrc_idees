@@ -3,23 +3,21 @@ name = "ec_jrc_idees"
 version = "0.1.0"
 description = "Easy JRC-IDEES data!"
 authors = [{name = "Ivan Ruiz Manuel", email = "72193617+irm-codebase@users.noreply.github.com"}]
-requires-python = ">= 3.11"
+requires-python = ">= 3.12"
 dependencies = ["styleframe>=4.2,<5"]
-
-[project.optional-dependencies]
-test = ["pytest", "mypy", "ruff"]
 
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
 [tool.codespell]
-skip = 'tests/*.py,*.shp,*.geojson'
+skip = 'tests/*.py'
 count = ''
 quiet-level = 3
 ignore-words-list = "socio-economic,manuel"
-
-[tool.mypy]
 
 [tool.pixi.project]
 channels = ["conda-forge"]
@@ -38,18 +36,13 @@ pandas-stubs = ">=2.2.2.240805,<3"
 pyyaml = ">=6.0.1,<7"
 types-pyyaml = ">=6.0.12.20240724,<7"
 inflection = ">=0.5.1,<0.6"
+requests = ">=2.32.3,<3"
+pytest = ">=8.3.3,<9"
+ruff = ">=0.6.5,<0.7"
 
 # Environments
 [tool.pixi.environments]
 default = { solve-group = "default" }
-test = { features = ["test"], solve-group = "default" }
-
-[tool.pixi.feature.test.dependencies]
-ipykernel = ">=6.29.5,<7"
-
-[tool.ruff]
-target-version = "py311"
-builtins = ["snakemake"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "Q", "W", "D", "PT", "PL", "PD", "C90", "UP"]
@@ -59,7 +52,7 @@ split-on-trailing-comma = false
 
 [tool.ruff.lint.per-file-ignores]
 "*.ipynb" = ["E402"]
-"test/**" =["D"]
+"__init__.py" = ["D104"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
@@ -71,3 +64,11 @@ ignore-overlong-task-comments = true
 [tool.ruff.format]
 exclude = [".*.egg-info"]
 skip-magic-trailing-comma = true
+
+[tool.mypy]
+disable_error_code = "import-untyped"
+
+[tool.pytest.ini_options]
+addopts = ["--import-mode=importlib"]
+pythonpath = ["src"]
+testpaths = ["tests"]
