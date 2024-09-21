@@ -5,9 +5,10 @@ from math import isclose
 from pathlib import Path
 from typing import Literal
 
-import numpy as np
 import pandas as pd
 from styleframe import StyleFrame
+
+from ec_jrc_idees.utils import Metadata, get_filename_metadata
 
 STYLE_FEATURES = Literal[
     "bg_color", "bold", "font_color", "underline", "border_type", "indent"
@@ -19,7 +20,6 @@ class IDEESSection:
 
     EXCEL_ROW_RANGE: tuple[int, int]
     NAME: str
-    YEAR_RANGE: tuple[int, int] = (2000, 2021)
 
     def __init__(self, dirty_sheet: pd.DataFrame, style: StyleFrame, cnf: dict) -> None:
         self.cnf: dict = cnf
@@ -31,7 +31,7 @@ class IDEESSection:
             .dropna(how="all", axis="columns")
             .drop("Code", axis="columns", errors="ignore")
         )
-        self.tidy_df: pd.DataFrame = pd.DataFrame()
+        self.tidy_df: pd.DataFrame
 
     @abstractmethod
     def tidy_up(self):
@@ -41,11 +41,6 @@ class IDEESSection:
     def get_excel_slice(self, excel_rows: tuple[int, int]):
         """Get a dataframe section based on excel numbers."""
         return slice(excel_rows[0] - 2, excel_rows[1] - 2)
-
-    def get_style_feature(self, feature: STYLE_FEATURES, index: pd.Index) -> pd.Series:
-        """Search the styleframe using the fist column."""
-        col = self.dirty_df.columns[0]
-        return getattr(self.style[col].style, feature)[index]
 
     def find_subsection(
         self,
@@ -77,11 +72,10 @@ class IDEESSection:
         elif find == "index":
             return idx
 
-    def check_subsection(self, columns: list[int], section: list[int]):
+    def check_subsection(self, columns: list[int], aggregate: list[int]):
         """Compare results against aggregated data sections.
 
-        Assumes that 'section' specifies a row where values have been aggregated.
-        The sum of the rows below it, and before the next section, should match it.
+        Compares the sum of the rows below the aggregate and before the next section.
 
         Parameters
         ----------
@@ -95,29 +89,29 @@ class IDEESSection:
         ValueError
             Incorrect parsing detected (checksum failed).
         """
-        results = self.results[columns]
+        results = self.tidy_df[columns]
         data = self.dirty_df[columns]
-        for i, idx in enumerate(section):
-            if idx == section[-1]:
+        for i, idx in enumerate(aggregate):
+            if idx == aggregate[-1]:
                 results_sum = results.loc[idx:].sum().sum()
                 data_sum = data.loc[idx].sum()
             else:
                 results_sum = (
-                    self.results.loc[idx : section[i + 1], columns].sum().sum()
+                    self.tidy_df.loc[idx : aggregate[i + 1], columns].sum().sum()
                 )
                 data_sum = data.loc[idx].sum()
             if not isclose(results_sum, data_sum):
                 raise ValueError("Parsing was incorrect!")
 
     def get_text_column(self) -> pd.Series:
-        """Return the text column of this section."""
+        """Get the text column of this section."""
         idees_text = self.dirty_df.select_dtypes("object")
         if len(idees_text.columns) > 1:
             raise ValueError("Section contains more than one column with text.")
         return idees_text[self.dirty_df.columns[0]]
 
-    def get_annual_data(self) -> pd.DataFrame:
-        """Return yearly data for this section."""
+    def get_annual_dataframe(self) -> pd.DataFrame:
+        """Get yearly data in this section."""
         year_data = self.dirty_df.select_dtypes("number")
         return year_data
 
@@ -157,12 +151,16 @@ class IDEESFile(ABC):
 
     TARGET_SHEETS: list[type[IDEESSheet]]
     VALID_VERSIONS: list[int]
+    NAME: str
 
-    def __init__(self, filepath: Path, cnf: dict) -> None:
+    def __init__(self, filepath: Path | str, cnf: dict) -> None:
+        filepath = Path(filepath)
+
         self.excel: pd.ExcelFile = pd.ExcelFile(filepath)
         self.cnf: dict = cnf
         self.dirty_sheets: dict[str, IDEESSheet] = {}
         self.tidy_sheets: dict[str, dict[str, pd.DataFrame]] = {}
+        self.metadata: Metadata = get_filename_metadata(filepath.name)
 
     def prepare(self) -> None:
         """Prepare the sheet code needed for this file and version."""

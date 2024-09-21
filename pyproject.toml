@@ -39,6 +39,7 @@ inflection = ">=0.5.1,<0.6"
 requests = ">=2.32.3,<3"
 pytest = ">=8.3.3,<9"
 ruff = ">=0.6.5,<0.7"
+mypy = ">=1.11.2,<2"
 
 # Environments
 [tool.pixi.environments]

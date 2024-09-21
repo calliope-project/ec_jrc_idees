@@ -1,9 +1,14 @@
 """Generic utility functions that may be used anywhere."""
 
-from typing import NamedTuple
+from typing import Literal, NamedTuple
 
 import inflection
 import pandas as pd
+from styleframe import StyleFrame
+
+STYLE_FEATURES = Literal[
+    "bg_color", "bold", "font_color", "underline", "border_type", "indent"
+]
 
 
 class Metadata(NamedTuple):
@@ -35,7 +40,7 @@ def standardize_unit(unit: str):
     """Convert text to underscored lowercase."""
     unit = unit.replace(" of ", "_")
     if "/" in unit:
-        if unit[unit.find("/") - 1 ] == " " and unit[unit.find("/") + 1 ] == " ":
+        if unit[unit.find("/") - 1] == " " and unit[unit.find("/") + 1] == " ":
             unit = unit.replace("/", "per")
         else:
             unit = unit.replace("/", " per ")
@@ -48,3 +53,18 @@ def insert_prefix_columns(data: pd.DataFrame, prefixes: dict):
     """Add columns with default values at the start of a dataframe."""
     for column, value in reversed(prefixes.items()):
         data.insert(0, column, value, allow_duplicates=False)
+
+
+def get_style_feature(
+    style: StyleFrame,
+    feature: STYLE_FEATURES,
+    rows: pd.Index | None = None,
+) -> pd.Series:
+    """Search Excel style features of the first column.
+
+    Optionally, return only specific rows.
+    """
+    series = getattr(style[style.columns[0].value].style, feature)
+    if rows is not None:
+        series = series[rows]
+    return series

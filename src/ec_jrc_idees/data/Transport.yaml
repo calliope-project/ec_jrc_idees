@@ -1,0 +1,19 @@
+prefix_cols:
+  category: Transport
+sheets:
+  TrRoad_ene:
+    prefix_cols:
+    sections:
+      RoadEnergyConsumption:
+        cols:
+          category:
+          subcategory: "Road"
+          vehicle_type:
+          vehicle_subtype:
+          carrier:
+          units:
+          variable: "TotalEnergyConsumption"
+
+
+
+
