@@ -11,7 +11,7 @@ from styleframe import StyleFrame  # type: ignore
 
 from ec_jrc_idees.settings import CNF, SUPPORTED_FILES, SUPPORTED_MC, SUPPORTED_YEARS
 from ec_jrc_idees.settings.config import tidy_columns_cnf
-from ec_jrc_idees.utils import cleaning
+from ec_jrc_idees._utils import cleaning
 
 STYLE_FEATURES = Literal[
     "bg_color", "bold", "font_color", "underline", "border_type", "indent"

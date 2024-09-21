@@ -2,15 +2,10 @@
 
 import importlib.resources
 import zipfile
-from collections import namedtuple
 from pathlib import Path
 
 import requests
 import yaml
-
-Metadata: tuple[int, str, str] = namedtuple(
-    "Metadata", ["version", "file", "country_eurostat"]
-)
 
 
 class EasyIDEES:
@@ -22,16 +17,11 @@ class EasyIDEES:
         self.config: dict = config["version_specific"][str(version)]
         self.config = self.config | config["generic"]
 
-    @staticmethod
-    def _get_filename_metadata(filename: str):
-        data = filename.split("-")[-1].split("_")
-        metadata = Metadata(int(data[0]), data[1], data[-1].split(".")[0])
-        return metadata
-
     def process_files(self, dir: Path):
         for element in dir.iterdir():
             if element.is_file():
-                metadata = self._get_filename_metadata(element.name)
+                # TODO: call file processors here.
+                pass
 
     def download_country(self, country: str, zip: Path):
         """Download a large file from the internet."""

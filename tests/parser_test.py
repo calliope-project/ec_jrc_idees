@@ -1,6 +1,7 @@
 """Test main functionality."""
 
 import pytest
+
 from ec_jrc_idees import parser
 
 
@@ -17,15 +18,18 @@ def downloaded_file(request, easy, tmp_path):
     easy.download_country(request.param, file)
     return file
 
-@pytest.fixture()
+
+@pytest.fixture
 def unzipped_files(easy, downloaded_file, tmp_path):
     """Unzip dataset versions."""
     easy.unzip(downloaded_file, tmp_path)
     return tmp_path
 
+
 def test_download(downloaded_file):
     """Country downloads should work as expected."""
     assert downloaded_file.exists()
+
 
 def test_unzip(unzipped_files):
     """Unzipping should work as expected."""
