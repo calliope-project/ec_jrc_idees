@@ -1,5 +1,4 @@
 prefix_cols:
-  category: Transport
 sheets:
   TrRoad_act:
     prefix_cols:
@@ -11,6 +10,9 @@ sheets:
           vehicle_type:
           units: "million km"
           variable: "DistanceDriven"
+  TrRoad_tech:
+    prefix_cols:
+    sections:
       RoadTotalStock:
         template_columns:
           category:
@@ -18,30 +20,34 @@ sheets:
           vehicle_type:
           units: "vehicles"
           variable: "TotalStock"
-  # TrRoad_tech:
-  #   prefix_cols:
-  #   sections:
-  #     RoadTotalStockTestEfficiency:
-  #       template_columns:
-  #         category:
-  #         subcategory: "Road"
-  #         vehicle_type:
-  #         units:
-  #         variable: "TotalStockTestEfficiency"
-  #     RoadTotalStockTestDiscrepancy:
-  #       template_columns:
-  #         category:
-  #         subcategory: "Road"
-  #         vehicle_type:
-  #         units:
-  #         variable: "TotalStockTestDiscrepancy"
-      # NewVehicleStock:
-      #   template_columns:
-      #     category:
-      #     subcategory: "Road"
-      #     vehicle_type:
-      #     units: vehicles
-      #     variable: "NewVehicleStock"
+      RoadTotalStockTestEfficiency:
+        template_columns:
+          category:
+          subcategory: "Road"
+          vehicle_type:
+          units: "kgoe per 100 km"
+          variable: "TotalStockTestEfficiency"
+      RoadTotalStockTestDiscrepancy:
+        template_columns:
+          category:
+          subcategory: "Road"
+          vehicle_type:
+          units: "ratio"
+          variable: "TotalStockTestDiscrepancy"
+      RoadNewRegistrations:
+        template_columns:
+          category:
+          subcategory: "Road"
+          vehicle_type:
+          units: "vehicles"
+          variable: "NewRegistrations"
+      RoadNewRegistrationsTestEfficiency:
+        template_columns:
+          category:
+          subcategory: "Road"
+          vehicle_type:
+          units: "kgoe per 100 km"
+          variable: "NewRegistrationsTestEfficiency"
   TrRoad_ene:
     prefix_cols:
     sections:

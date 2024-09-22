@@ -14,6 +14,8 @@ STYLE_FEATURES = Literal[
     "bg_color", "bold", "font_color", "underline", "border_type", "indent"
 ]
 
+MIN_YEAR = 2000
+MAX_YEAR = 2021
 
 class IDEESSection:
     """Generic IDEES section within a sheet."""
@@ -117,15 +119,17 @@ class IDEESSection:
 
     def get_idees_text_column(self) -> pd.Series:
         """Get the text column of this section."""
-        idees_text = self.dirty_df.select_dtypes("object")
-        if len(idees_text.columns) > 1:
-            raise ValueError("Section contains more than one column with text.")
-        return idees_text[self.dirty_df.columns[0]]
+        idees_text = self.dirty_df.iloc[:, 0]
+        if not all(isinstance(i, str) for i in idees_text.to_numpy()):
+            raise ValueError("First column should only be string values.")
+        return idees_text
 
     def get_annual_dataframe(self) -> pd.DataFrame:
         """Get yearly data in this section."""
-        year_data = self.dirty_df.select_dtypes("number")
-        return year_data
+        annual_df = self.dirty_df.iloc[:, 1:]
+        if not all([MIN_YEAR <= i and i <= MAX_YEAR for i in annual_df.columns]):
+            raise ValueError("Second to last columns should be years.")
+        return annual_df
 
 
 class IDEESSheet:

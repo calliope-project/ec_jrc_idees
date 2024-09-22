@@ -72,17 +72,14 @@ class RoadSection(IDEESSection):
         aggregates = [
             get_total_aggregates(self.idees_text, self.style),
             get_category_aggregates(self.idees_text, self.style),
-            get_vehicle_type_aggregates(self.idees_text, self.style)
+            get_vehicle_type_aggregates(self.idees_text, self.style),
         ]
         for agg in aggregates:
             self.check_subsection(years, agg.index)
 
 
-class RoadVKM(RoadSection):
-    """Road activity per vehicle processing."""
-
-    EXCEL_ROW_RANGE = (30, 55)
-    VALID_VERSIONS = (2021, 2015)
+class RoadSectionNoCarriers(RoadSection):
+    """Generic data extraction for sections with no carrier specific data."""
 
     @override
     def tidy_up(self):
@@ -121,6 +118,25 @@ class RoadVKM(RoadSection):
                 raise ValueError(f"Entry not fully filled: {entry}")
             tidy_df.loc[row] = entry
         self.tidy_df = tidy_df
+
+
+class RoadSectionNoCarrierNoAggregates(RoadSectionNoCarriers):
+    """Generic data extraction for no carrier sections without aggregates."""
+
+    @override
+    def check(self):
+        # Sections with ratios or rates have no aggregates for testing.
+        # Insead, rely on their matching shape with other sections and
+        # check that all gathered values can be interpreted as numeric.
+        years = self.annual_df.columns
+        self.tidy_df[years].apply(lambda x: pd.to_numeric(x, errors="raise"))
+
+
+class RoadVKM(RoadSectionNoCarriers):
+    """Road activity per vehicle processing."""
+
+    EXCEL_ROW_RANGE = (30, 55)
+    VALID_VERSIONS = (2021, 2015)
 
 
 class RoadEnergyConsumption(RoadSection):
@@ -199,30 +215,38 @@ class RoadEnergyConsumption(RoadSection):
         return carriers
 
 
-# Same processing as Road activity, so inheritance makes sense.
-class RoadTotalStock(RoadVKM):
-    """Road activity per vehicle processing."""
+class RoadTotalStock(RoadSectionNoCarriers):
+    """Road total vehicle stock processing."""
 
-    EXCEL_ROW_RANGE = (57, 82)
+    EXCEL_ROW_RANGE = (3, 28)
     VALID_VERSIONS = (2021, 2015)
 
 
-class RoadTotalStockTestEfficiency(RoadVKM):
-    """Road activity per vehicle processing."""
+class RoadTotalStockTestEfficiency(RoadSectionNoCarrierNoAggregates):
+    """Road total vehicle stock test efficiency."""
 
     EXCEL_ROW_RANGE = (88, 113)
     VALID_VERSIONS = (2021, 2015)
 
-    @override
-    def get_annual_dataframe(self) -> pd.DataFrame:
-        year_data = self.dirty_df.select_dtypes("number")
-        return year_data
 
-
-class RoadTotalStockTestDiscrepancy(RoadVKM):
-    """Road activity per vehicle processing."""
+class RoadTotalStockTestDiscrepancy(RoadSectionNoCarrierNoAggregates):
+    """Road total vehicle stock test discrepancy."""
 
     EXCEL_ROW_RANGE = (115, 140)
+    VALID_VERSIONS = (2021, 2015)
+
+
+class RoadNewRegistrations(RoadSectionNoCarriers):
+    """Road new vehicles registered."""
+
+    EXCEL_ROW_RANGE = (30, 55)
+    VALID_VERSIONS = (2021, 2015)
+
+
+class RoadNewRegistrationsTestEfficiency(RoadSectionNoCarrierNoAggregates):
+    """Road new registered vehicles test efficiency."""
+
+    EXCEL_ROW_RANGE = (142, 167)
     VALID_VERSIONS = (2021, 2015)
 
 
@@ -230,7 +254,7 @@ class TrRoad_act(IDEESSheet):
     """Transport Road energy."""
 
     SHEET_NAME = "TrRoad_act"
-    SECTION_CLEANERS = [RoadVKM, RoadTotalStock]
+    SECTION_CLEANERS = [RoadVKM]
 
     @override
     def check(self):
@@ -254,7 +278,13 @@ class TrRoad_tech(IDEESSheet):
     """Transport Road energy."""
 
     SHEET_NAME = "TrRoad_tech"
-    SECTION_CLEANERS = [RoadTotalStockTestEfficiency]
+    SECTION_CLEANERS = [
+        RoadTotalStock,
+        RoadTotalStockTestEfficiency,
+        RoadTotalStockTestDiscrepancy,
+        RoadNewRegistrations,
+        RoadNewRegistrationsTestEfficiency
+    ]
 
     @override
     def check(self):
@@ -263,9 +293,8 @@ class TrRoad_tech(IDEESSheet):
 
 
 class TransportFile(IDEESFile):
-    """Processing of transport data."""
+    """Processing of Road transport data."""
 
-    NAME = "Transport"
     SHEET_CLEANERS = [TrRoad_act, TrRoad_ene, TrRoad_tech]
 
     @override
