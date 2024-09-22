@@ -105,7 +105,7 @@ class RoadSectionNoCarriers(RoadSection):
             if row in vehicle_types and not any(
                 [i in vehicle_types[row] for i in TWO_WHEEL_TEXT]
             ):
-                # Vehicle type aggregates shouls also be skipped, except two-wheelers.
+                # Vehicle type aggregates should also be skipped, except two-wheelers.
                 continue
 
             # Identify the characteristics of this row.
@@ -126,7 +126,7 @@ class RoadSectionNoCarrierNoAggregates(RoadSectionNoCarriers):
     @override
     def check(self):
         # Sections with ratios or rates have no aggregates for testing.
-        # Insead, rely on their matching shape with other sections and
+        # Instead, rely on their matching shape with other sections and
         # check that all gathered values can be interpreted as numeric.
         years = self.annual_df.columns
         self.tidy_df[years].apply(lambda x: pd.to_numeric(x, errors="raise"))
