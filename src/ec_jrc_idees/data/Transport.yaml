@@ -4,20 +4,44 @@ sheets:
   TrRoad_act:
     prefix_cols:
     sections:
-      RoadVehicleActivity:
+      RoadVKM:
         template_columns:
           category:
           subcategory: "Road"
           vehicle_type:
-          units:
+          units: "million km"
           variable: "DistanceDriven"
-      RoadVehicleTotalStock:
+      RoadTotalStock:
         template_columns:
           category:
           subcategory: "Road"
           vehicle_type:
-          units:
+          units: "vehicles"
           variable: "TotalStock"
+  # TrRoad_tech:
+  #   prefix_cols:
+  #   sections:
+  #     RoadTotalStockTestEfficiency:
+  #       template_columns:
+  #         category:
+  #         subcategory: "Road"
+  #         vehicle_type:
+  #         units:
+  #         variable: "TotalStockTestEfficiency"
+  #     RoadTotalStockTestDiscrepancy:
+  #       template_columns:
+  #         category:
+  #         subcategory: "Road"
+  #         vehicle_type:
+  #         units:
+  #         variable: "TotalStockTestDiscrepancy"
+      # NewVehicleStock:
+      #   template_columns:
+      #     category:
+      #     subcategory: "Road"
+      #     vehicle_type:
+      #     units: vehicles
+      #     variable: "NewVehicleStock"
   TrRoad_ene:
     prefix_cols:
     sections:
@@ -28,5 +52,5 @@ sheets:
           vehicle_type:
           vehicle_subtype:
           carrier:
-          units:
+          units: "ktoe"
           variable: "TotalEnergyConsumption"

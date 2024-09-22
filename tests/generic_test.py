@@ -14,7 +14,6 @@ class Section(IDEESSection):
     """Dummy section functionality."""
 
     EXCEL_ROW_RANGE = (17, 56)
-    NAME = "totalEnergyConsumption"
 
     def tidy_up(self):
         """Placehold of dummy process."""
@@ -28,8 +27,8 @@ class Section(IDEESSection):
 class Sheet(IDEESSheet):
     """Dummy sheet functionality."""
 
-    NAME = "TrRoad_ene"
-    TARGET_SECTIONS = [Section]
+    SHEET_NAME = "TrRoad_ene"
+    SECTION_CLEANERS = [Section]
 
     @override
     def check(self):
@@ -39,8 +38,7 @@ class Sheet(IDEESSheet):
 class File(IDEESFile):
     """Dummy file functionality."""
 
-    NAME = "Transport"
-    TARGET_SHEETS = [Sheet]
+    SHEET_CLEANERS = [Sheet]
 
     @override
     def check(self):
@@ -59,12 +57,12 @@ def dummy_cnf():
     return yaml.safe_load(
         """
 sheets:
-  TrRoad_ene:
+  Sheet:
     prefix_cols:
       category:
       subcategory: "Road"
     sections:
-      totalEnergyConsumption:
+      Section:
         prefix_cols:
 """
     )
@@ -94,4 +92,4 @@ def test_generic_file_preparation(file: File, dummy_cnf):
         for sheet_name, sheet in file.tidy_sheets.items()
     }
     assert cnf_dict == file_dict
-    assert DUMMY_TIDY_DF.equals(file.tidy_sheets[Sheet.NAME][Section.NAME])
+    assert DUMMY_TIDY_DF.equals(file.tidy_sheets[Sheet.__name__][Section.__name__])

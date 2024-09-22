@@ -63,21 +63,33 @@ def get_vehicle_subtype_aggregates(idees_text: pd.Series, style: StyleFrame):
     return VehicleAggregates(vehicle_types, vehicle_subtypes)
 
 
-class RoadActivityVKM(IDEESSection):
+class RoadSection(IDEESSection):
+    """Adds generic calculations specific to Road transport."""
+
+    @override
+    def check(self):
+        years = self.annual_df.columns
+        aggregates = [
+            get_total_aggregates(self.idees_text, self.style),
+            get_category_aggregates(self.idees_text, self.style),
+            get_vehicle_type_aggregates(self.idees_text, self.style)
+        ]
+        for agg in aggregates:
+            self.check_subsection(years, agg.index)
+
+
+class RoadVKM(RoadSection):
     """Road activity per vehicle processing."""
 
-    NAME = "RoadVehicleActivity"
     EXCEL_ROW_RANGE = (30, 55)
     VALID_VERSIONS = (2021, 2015)
 
     @override
     def tidy_up(self):
         years = self.annual_df.columns
-        units = utils.get_unit_in_parenthesis(self.idees_text.iloc[0])
 
         # Build a template row to add data to
         template = pd.Series(self.cnf["template_columns"])
-        template["units"] = units
         template = pd.concat([template, pd.Series(None, index=years)])
 
         # Get aggregate sections
@@ -110,54 +122,19 @@ class RoadActivityVKM(IDEESSection):
             tidy_df.loc[row] = entry
         self.tidy_df = tidy_df
 
-    @override
-    def check(self):
-        years = self.annual_df.columns
-        aggregates = [
-            get_total_aggregates(self.idees_text, self.style),
-            get_category_aggregates(self.idees_text, self.style),
-            get_vehicle_type_aggregates(self.idees_text, self.style)
-        ]
-        for agg in aggregates:
-            self.check_subsection(years, agg.index)
 
-
-# Same processing as Road activity, so inheritance makes sense.
-class RoadTotalStock(RoadActivityVKM):
-    """Road activity per vehicle processing."""
-
-    NAME = "RoadVehicleTotalStock"
-    EXCEL_ROW_RANGE = (57, 82)
-    VALID_VERSIONS = (2021, 2015)
-
-
-class TrRoad_act(IDEESSheet):
-    """Transport Road energy."""
-
-    NAME = "TrRoad_act"
-    TARGET_SECTIONS = [RoadActivityVKM, RoadTotalStock]
-
-    @override
-    def check(self):
-        # TODO: add checks once all transport files are processed.
-        pass
-
-
-class RoadEnergyConsumption(IDEESSection):
+class RoadEnergyConsumption(RoadSection):
     """Road Energy Consumption processing."""
 
-    NAME = "RoadEnergyConsumption"
     EXCEL_ROW_RANGE = (17, 56)
     VALID_VERSIONS = (2015, 2021)
 
     @override
     def tidy_up(self):
         years = self.annual_df.columns
-        units = utils.get_unit_in_parenthesis(self.idees_text.iloc[0])
 
         # Build a template row to add data to
         template = pd.Series(self.cnf["template_columns"])
-        template["units"] = units
         template = pd.concat([template, pd.Series(None, index=years)])
 
         # Get aggregated sections
@@ -221,23 +198,63 @@ class RoadEnergyConsumption(IDEESSection):
                 raise ValueError(f"Could not identify carrier for '{subtype}'.")
         return carriers
 
+
+# Same processing as Road activity, so inheritance makes sense.
+class RoadTotalStock(RoadVKM):
+    """Road activity per vehicle processing."""
+
+    EXCEL_ROW_RANGE = (57, 82)
+    VALID_VERSIONS = (2021, 2015)
+
+
+class RoadTotalStockTestEfficiency(RoadVKM):
+    """Road activity per vehicle processing."""
+
+    EXCEL_ROW_RANGE = (88, 113)
+    VALID_VERSIONS = (2021, 2015)
+
+    @override
+    def get_annual_dataframe(self) -> pd.DataFrame:
+        year_data = self.dirty_df.select_dtypes("number")
+        return year_data
+
+
+class RoadTotalStockTestDiscrepancy(RoadVKM):
+    """Road activity per vehicle processing."""
+
+    EXCEL_ROW_RANGE = (115, 140)
+    VALID_VERSIONS = (2021, 2015)
+
+
+class TrRoad_act(IDEESSheet):
+    """Transport Road energy."""
+
+    SHEET_NAME = "TrRoad_act"
+    SECTION_CLEANERS = [RoadVKM, RoadTotalStock]
+
     @override
     def check(self):
-        years = self.annual_df.columns
-        aggregates = [
-            get_total_aggregates(self.idees_text, self.style),
-            get_category_aggregates(self.idees_text, self.style),
-            get_vehicle_type_aggregates(self.idees_text, self.style)
-        ]
-        for agg in aggregates:
-            self.check_subsection(years, agg.index)
+        # TODO: add checks once all transport files are processed.
+        pass
 
 
 class TrRoad_ene(IDEESSheet):
     """Transport Road energy."""
 
-    NAME = "TrRoad_ene"
-    TARGET_SECTIONS = [RoadEnergyConsumption]
+    SHEET_NAME = "TrRoad_ene"
+    SECTION_CLEANERS = [RoadEnergyConsumption]
+
+    @override
+    def check(self):
+        # TODO: add checks once all transport files are processed.
+        pass
+
+
+class TrRoad_tech(IDEESSheet):
+    """Transport Road energy."""
+
+    SHEET_NAME = "TrRoad_tech"
+    SECTION_CLEANERS = [RoadTotalStockTestEfficiency]
 
     @override
     def check(self):
@@ -249,7 +266,7 @@ class TransportFile(IDEESFile):
     """Processing of transport data."""
 
     NAME = "Transport"
-    TARGET_SHEETS = [TrRoad_act]
+    SHEET_CLEANERS = [TrRoad_act, TrRoad_ene, TrRoad_tech]
 
     @override
     def check(self):

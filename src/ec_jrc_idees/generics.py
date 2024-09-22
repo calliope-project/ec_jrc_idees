@@ -20,7 +20,6 @@ class IDEESSection:
 
     EXCEL_ROW_RANGE: tuple[int, int]
     VALID_VERSIONS: tuple[int, ...]
-    NAME: str
 
     def __init__(self, dirty_sheet: pd.DataFrame, style: StyleFrame, cnf: dict) -> None:
         self.cnf: dict = cnf
@@ -111,9 +110,7 @@ class IDEESSection:
                 data_sum = self.dirty_df[columns].loc[idx].sum()
             else:
                 end = aggregate_indexes[i + 1] - 1  # index before next aggregate row
-                results_sum = (
-                    self.tidy_df.loc[slice(idx, end), columns].sum().sum()
-                )
+                results_sum = self.tidy_df.loc[slice(idx, end), columns].sum().sum()
                 data_sum = self.dirty_df[columns].loc[idx].sum()
             if not isclose(results_sum, data_sum):
                 raise ValueError("Parsing was incorrect!")
@@ -134,17 +131,20 @@ class IDEESSection:
 class IDEESSheet:
     """Generic IDEES sheet."""
 
-    NAME: str
-    TARGET_SECTIONS: list[type[IDEESSection]]
+    SHEET_NAME: str
+    SECTION_CLEANERS: list[type[IDEESSection]]
 
     def __init__(self, excel: pd.ExcelFile, cnf: dict) -> None:
-        self.dirty_sheet: pd.DataFrame = excel.parse(self.NAME)
+        self.dirty_sheet: pd.DataFrame = excel.parse(self.SHEET_NAME)
         self.style: StyleFrame = StyleFrame.read_excel(
-            excel, read_style=True, sheet_name=self.NAME
+            excel, read_style=True, sheet_name=self.SHEET_NAME
         )
         self.cnf: dict = cnf
         self.tidy_sections: dict[str, pd.DataFrame] = {}
         self.metadata: Metadata = get_filename_metadata(str(Path(str(excel.io)).name))
+        self.section_cleaners: dict[str, type[IDEESSection]] = {
+            _class.__name__: _class for _class in self.SECTION_CLEANERS
+        }
 
     def prepare(self) -> None:
         """Prepare features for this sheet, if necessary."""
@@ -152,10 +152,12 @@ class IDEESSheet:
 
     def tidy_up(self) -> None:
         """Turn all sections in this sheet into machine readable data."""
-        for target_section in self.TARGET_SECTIONS:
-            name = target_section.NAME
-            section_cleaner = target_section(
-                self.dirty_sheet, self.style, self.cnf["sections"][name]
+        target_sections = self.cnf["sections"]
+        for name, cnf in target_sections.items():
+            if name not in self.section_cleaners:
+                raise ValueError(f"Unable to clean configured section: '{name}'.")
+            section_cleaner = self.section_cleaners[name](
+                self.dirty_sheet, self.style, cnf
             )
             section_cleaner.prepare()
             section_cleaner.tidy_up()
@@ -175,8 +177,7 @@ class IDEESSheet:
 class IDEESFile(ABC):
     """Generic IDEES file."""
 
-    TARGET_SHEETS: list[type[IDEESSheet]]
-    NAME: str
+    SHEET_CLEANERS: list[type[IDEESSheet]]
 
     def __init__(self, filepath: Path | str, cnf: dict) -> None:
         filepath = Path(filepath)
@@ -185,6 +186,9 @@ class IDEESFile(ABC):
         self.cnf: dict = cnf
         self.tidy_sheets: dict[str, dict[str, pd.DataFrame]] = {}
         self.metadata: Metadata = get_filename_metadata(filepath.name)
+        self.available_sheets: dict[str, type[IDEESSheet]] = {
+            _class.__name__: _class for _class in self.SHEET_CLEANERS
+        }
 
     def prepare(self) -> None:
         """Prepare features for this file, if necessary."""
@@ -192,9 +196,11 @@ class IDEESFile(ABC):
 
     def tidy_up(self) -> None:
         """Clean all sheets configured for this file."""
-        for target_sheet in self.TARGET_SHEETS:
-            name = target_sheet.NAME
-            sheet_cleaner = target_sheet(self.excel, self.cnf["sheets"][name])
+        target_sheets = self.cnf["sheets"]
+        for name, cnf in target_sheets.items():
+            if name not in self.available_sheets:
+                raise ValueError(f"Unable to clean configured sheet: '{name}'.")
+            sheet_cleaner = self.available_sheets[name](self.excel, cnf)
             sheet_cleaner.prepare()
             sheet_cleaner.tidy_up()
             sheet_cleaner.check()
