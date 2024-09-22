@@ -5,7 +5,6 @@ from typing import override
 import pandas as pd
 import pytest
 import yaml
-
 from ec_jrc_idees.generics import IDEESFile, IDEESSection, IDEESSheet
 
 DUMMY_TIDY_DF = pd.DataFrame(True, columns=[1, 2, 3], index=[1, 2, 3])
@@ -46,13 +45,13 @@ class File(IDEESFile):
         return True
 
 
-@pytest.fixture
+@pytest.fixture()
 def path():
     """Path to arbitrary test files."""
     return "tests/files/JRC-IDEES-2021_Transport_DE.xlsx"
 
 
-@pytest.fixture
+@pytest.fixture()
 def dummy_cnf():
     """Create a dummy configuration."""
     return yaml.safe_load(
@@ -69,7 +68,7 @@ sheets:
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def file(path, dummy_cnf):
     """File object."""
     return File(path, dummy_cnf)
