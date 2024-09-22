@@ -1,6 +1,16 @@
 prefix_cols:
   category: Transport
 sheets:
+  TrRoad_act:
+    prefix_cols:
+    sections:
+      RoadVehicleActivity:
+        template_columns:
+          category:
+          subcategory: "Road"
+          vehicle_type:
+          units:
+          variable: "DistanceDriven"
   TrRoad_ene:
     prefix_cols:
     sections:

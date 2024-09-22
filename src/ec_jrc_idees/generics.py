@@ -19,6 +19,7 @@ class IDEESSection:
     """Generic IDEES section within a sheet."""
 
     EXCEL_ROW_RANGE: tuple[int, int]
+    VALID_VERSIONS: tuple[int, ...]
     NAME: str
 
     def __init__(self, dirty_sheet: pd.DataFrame, style: StyleFrame, cnf: dict) -> None:
@@ -41,11 +42,17 @@ class IDEESSection:
         self.idees_text = self.get_idees_text_column()
         self.annual_df = self.get_annual_dataframe()
 
-
     @abstractmethod
     def tidy_up(self):
         """Process section."""
-        ...
+
+    @abstractmethod
+    def check(self):
+        """Run validation for this section."""
+
+    def prettify(self) -> None:
+        """Rename and standardise stuff, if necessary."""
+        pass
 
     def get_excel_slice(self, excel_rows: tuple[int, int]):
         """Get a dataframe section based on excel numbers."""
@@ -81,7 +88,7 @@ class IDEESSection:
         elif find == "index":
             return idx
 
-    def check_subsection(self, columns: list[int], aggregate: list[int]):
+    def check_subsection(self, columns, aggregate_indexes):
         """Compare results against aggregated data sections.
 
         Compares the sum of the rows below the aggregate and before the next section.
@@ -98,17 +105,16 @@ class IDEESSection:
         ValueError
             Incorrect parsing detected (checksum failed).
         """
-        results = self.tidy_df[columns]
-        data = self.dirty_df[columns]
-        for i, idx in enumerate(aggregate):
-            if idx == aggregate[-1]:
-                results_sum = results.loc[idx:].sum().sum()
-                data_sum = data.loc[idx].sum()
+        for i, idx in enumerate(aggregate_indexes):
+            if idx == aggregate_indexes[-1]:
+                results_sum = self.tidy_df[columns].loc[idx:].sum().sum()
+                data_sum = self.dirty_df[columns].loc[idx].sum()
             else:
+                end = aggregate_indexes[i + 1] - 1  # index before next aggregate row
                 results_sum = (
-                    self.tidy_df.loc[idx : aggregate[i + 1], columns].sum().sum()
+                    self.tidy_df.loc[slice(idx, end), columns].sum().sum()
                 )
-                data_sum = data.loc[idx].sum()
+                data_sum = self.dirty_df[columns].loc[idx].sum()
             if not isclose(results_sum, data_sum):
                 raise ValueError("Parsing was incorrect!")
 
@@ -138,6 +144,7 @@ class IDEESSheet:
         )
         self.cnf: dict = cnf
         self.tidy_sections: dict[str, pd.DataFrame] = {}
+        self.metadata: Metadata = get_filename_metadata(str(Path(str(excel.io)).name))
 
     def prepare(self) -> None:
         """Prepare features for this sheet, if necessary."""
@@ -147,17 +154,28 @@ class IDEESSheet:
         """Turn all sections in this sheet into machine readable data."""
         for target_section in self.TARGET_SECTIONS:
             name = target_section.NAME
-            dirty_section = target_section(self.dirty_sheet, self.style, self.cnf["sections"][name])
-            dirty_section.prepare()
-            dirty_section.tidy_up()
-            self.tidy_sections[name] = dirty_section.tidy_df
+            section_cleaner = target_section(
+                self.dirty_sheet, self.style, self.cnf["sections"][name]
+            )
+            section_cleaner.prepare()
+            section_cleaner.tidy_up()
+            section_cleaner.prettify()
+            section_cleaner.check()
+            self.tidy_sections[name] = section_cleaner.tidy_df
+
+    def prettify(self) -> None:
+        """Rename and standardise stuff, if necessary."""
+        pass
+
+    @abstractmethod
+    def check(self):
+        """Run validation for this sheet."""
 
 
 class IDEESFile(ABC):
     """Generic IDEES file."""
 
     TARGET_SHEETS: list[type[IDEESSheet]]
-    VALID_VERSIONS: list[int]
     NAME: str
 
     def __init__(self, filepath: Path | str, cnf: dict) -> None:
@@ -176,7 +194,17 @@ class IDEESFile(ABC):
         """Clean all sheets configured for this file."""
         for target_sheet in self.TARGET_SHEETS:
             name = target_sheet.NAME
-            dirty_sheet = target_sheet(self.excel, self.cnf["sheets"][name])
-            dirty_sheet.prepare()
-            dirty_sheet.tidy_up()
-            self.tidy_sheets[name] = dirty_sheet.tidy_sections
+            sheet_cleaner = target_sheet(self.excel, self.cnf["sheets"][name])
+            sheet_cleaner.prepare()
+            sheet_cleaner.tidy_up()
+            sheet_cleaner.prettify()
+            sheet_cleaner.check()
+            self.tidy_sheets[name] = sheet_cleaner.tidy_sections
+
+    def prettify(self) -> None:
+        """Rename and standardise stuff, if necessary."""
+        pass
+
+    @abstractmethod
+    def check(self):
+        """Run validation for this file."""

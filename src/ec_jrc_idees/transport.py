@@ -13,6 +13,9 @@ CATEGORY_INDENT = 1
 VEHICLE_TYPE_INDENT = 2
 VEHICLE_SUBTYPE_INDENT = 3
 
+# In their wisdom, the JRC decided to change the naming of vehicles between versions
+TWO_WHEEL_TEXT = ["two-wheelers", "2-wheelers"]
+
 
 class VehicleAggregates(NamedTuple):
     """Vehicle types (passenger cars) and subtypes (gasoline engine) handler."""
@@ -33,26 +36,102 @@ def get_category_aggregates(idees_text: pd.Series, style: StyleFrame):
     return idees_text.loc[indent[indent == CATEGORY_INDENT].index]
 
 
-def get_vehicle_aggregates(idees_text: pd.Series, style: StyleFrame):
+def get_vehicle_type_aggregates(idees_text: pd.Series, style: StyleFrame):
+    """Identify rows with vehicle subtypes."""
+    indent = utils.get_style_feature(style, "indent", idees_text.index)
+    vehicle_types = idees_text.loc[indent[indent == VEHICLE_TYPE_INDENT].index]
+    return vehicle_types.str.split("(").str[0].str.rstrip()
+
+
+def get_vehicle_subtype_aggregates(idees_text: pd.Series, style: StyleFrame):
     """Identify rows with vehicle subtypes."""
     indent = utils.get_style_feature(style, "indent", idees_text.index)
 
-    vehicle_types = idees_text.loc[indent[indent == VEHICLE_TYPE_INDENT].index]
-    vehicle_types = vehicle_types.str.split("(").str[0].str.rstrip()
-
+    vehicle_types = get_vehicle_type_aggregates(idees_text, style)
     vehicle_subtypes = idees_text.loc[indent[indent == VEHICLE_SUBTYPE_INDENT].index]
     vehicle_subtypes = vehicle_subtypes[~vehicle_subtypes.str.contains("of which")]
     vehicle_subtypes = vehicle_subtypes.str.split("(").str[0].str.rstrip()
 
     # Fix messy categories
-    two_wheel = vehicle_types[vehicle_types.str.contains("two-wheelers")]
+    two_wheel = vehicle_types[vehicle_types.str.contains("|".join(TWO_WHEEL_TEXT))]
     if len(two_wheel) != 1:
         raise ValueError("Expected unique two-wheel category.")
     two_wheel_idx = two_wheel.index[0]
-    two_wheel_fuel = idees_text[two_wheel_idx].split("(")[1].split(")")[0]
+    two_wheel_fuel = "Gasoline"
     vehicle_subtypes[two_wheel_idx] = two_wheel_fuel + " engine"
 
     return VehicleAggregates(vehicle_types, vehicle_subtypes)
+
+
+class RoadActivityVKM(IDEESSection):
+    """Road activity per vehicle processing."""
+
+    NAME = "RoadVehicleActivity"
+    EXCEL_ROW_RANGE = (30, 55)
+    VALID_VERSIONS = (2021, 2015)
+
+    @override
+    def tidy_up(self):
+        years = self.annual_df.columns
+        units = utils.get_unit_in_parenthesis(self.idees_text.iloc[0])
+
+        # Build a template row to add data to
+        template = pd.Series(self.cnf["template_columns"])
+        template["units"] = units
+        template = pd.concat([template, pd.Series(None, index=years)])
+
+        # Get aggregate sections
+        total_aggr = get_total_aggregates(self.idees_text, self.style)
+        categories = get_category_aggregates(self.idees_text, self.style)
+        vehicle_types, vehicle_subtypes = get_vehicle_subtype_aggregates(
+            self.idees_text, self.style
+        )
+
+        tidy_df = pd.DataFrame(columns=template.index)
+        for row in self.annual_df.index:
+            entry = template.copy()
+            if row in total_aggr or row in categories:
+                # Aggregate rows unrelated to tech types should be skipped.
+                continue
+            if row in vehicle_types and not any(
+                [i in vehicle_types[row] for i in TWO_WHEEL_TEXT]
+            ):
+                # Vehicle type aggregates shouls also be skipped, except two-wheelers.
+                continue
+
+            # Identify the characteristics of this row.
+            entry[years] = self.annual_df.loc[row]
+            entry["category"] = self.find_subsection(row, categories)
+            entry["vehicle_type"] = self.find_subsection(row, vehicle_types)
+            entry["vehicle_subtype"] = self.find_subsection(row, vehicle_subtypes)
+
+            if None in entry:
+                raise ValueError(f"Entry not fully filled: {entry}")
+            tidy_df.loc[row] = entry
+        self.tidy_df = tidy_df
+
+    @override
+    def check(self):
+        years = self.annual_df.columns
+        aggregates = [
+            get_total_aggregates(self.idees_text, self.style),
+            get_category_aggregates(self.idees_text, self.style),
+            get_vehicle_type_aggregates(self.idees_text, self.style)
+        ]
+        for agg in aggregates:
+            self.check_subsection(years, agg.index)
+
+
+class TrRoad_act(IDEESSheet):
+    """Transport Road energy."""
+
+    NAME = "TrRoad_act"
+    TARGET_SECTIONS = [RoadActivityVKM]
+
+    @override
+    def check(self):
+        # TODO: add checks once all transport files are processed.
+        pass
 
 
 class RoadEnergyConsumption(IDEESSection):
@@ -60,6 +139,7 @@ class RoadEnergyConsumption(IDEESSection):
 
     NAME = "RoadEnergyConsumption"
     EXCEL_ROW_RANGE = (17, 56)
+    VALID_VERSIONS = (2015, 2021)
 
     @override
     def tidy_up(self):
@@ -74,7 +154,9 @@ class RoadEnergyConsumption(IDEESSection):
         # Get aggregated sections
         total_aggr = get_total_aggregates(self.idees_text, self.style)
         categories = get_category_aggregates(self.idees_text, self.style)
-        vehicle_types, vehicle_subtypes = get_vehicle_aggregates(self.idees_text, self.style)
+        vehicle_types, vehicle_subtypes = get_vehicle_subtype_aggregates(
+            self.idees_text, self.style
+        )
         carriers = self._find_carriers(vehicle_subtypes)
 
         of_which = self.idees_text.loc[self.idees_text.str.contains("of which")]
@@ -87,7 +169,9 @@ class RoadEnergyConsumption(IDEESSection):
             # Aggregated rows should be skipped, except for special cases.
             if row in total_aggr or row in categories:
                 continue
-            if row in vehicle_types and "two-wheelers" not in vehicle_types[row]:
+            if row in vehicle_types and not any(
+                [i in vehicle_types[row] for i in TWO_WHEEL_TEXT]
+            ):
                 continue
 
             entry[years] = self.annual_df.loc[row]
@@ -107,9 +191,7 @@ class RoadEnergyConsumption(IDEESSection):
             if None in entry:
                 raise ValueError(f"Entry not fully filled: {entry}.")
             tidy_df.loc[row] = entry
-
         self.tidy_df = tidy_df
-        self.check_subsection(years, vehicle_types.index)
 
     @staticmethod
     def _find_carriers(vehicle_subtypes: pd.Series) -> pd.Series:
@@ -130,6 +212,17 @@ class RoadEnergyConsumption(IDEESSection):
                 raise ValueError(f"Could not identify carrier for '{subtype}'.")
         return carriers
 
+    @override
+    def check(self):
+        years = self.annual_df.columns
+        aggregates = [
+            get_total_aggregates(self.idees_text, self.style),
+            get_category_aggregates(self.idees_text, self.style),
+            get_vehicle_type_aggregates(self.idees_text, self.style)
+        ]
+        for agg in aggregates:
+            self.check_subsection(years, agg.index)
+
 
 class TrRoad_ene(IDEESSheet):
     """Transport Road energy."""
@@ -137,9 +230,19 @@ class TrRoad_ene(IDEESSheet):
     NAME = "TrRoad_ene"
     TARGET_SECTIONS = [RoadEnergyConsumption]
 
+    @override
+    def check(self):
+        # TODO: add checks once all transport files are processed.
+        pass
+
 
 class TransportFile(IDEESFile):
     """Processing of transport data."""
 
     NAME = "Transport"
-    TARGET_SHEETS = [TrRoad_ene]
+    TARGET_SHEETS = [TrRoad_act]
+
+    @override
+    def check(self):
+        # TODO: add checks once all transport files are processed.
+        pass

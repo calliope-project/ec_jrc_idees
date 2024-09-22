@@ -15,7 +15,12 @@ def cnf():
     return yaml.safe_load(Path("src/ec_jrc_idees/data/Transport.yaml").read_text())
 
 
-@pytest.fixture(params=["tests/files/JRC-IDEES-2021_Transport_DE.xlsx"])
+@pytest.fixture(
+    params=[
+        "tests/files/JRC-IDEES-2021_Transport_DE.xlsx",
+        "tests/files/JRC-IDEES-2015_Transport_DE.xlsx",
+    ]
+)
 def file(request, cnf):
     """Test Transport file versions."""
     return TransportFile(request.param, cnf)
