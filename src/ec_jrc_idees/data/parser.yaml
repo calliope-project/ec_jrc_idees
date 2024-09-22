@@ -1,0 +1,77 @@
+generic:
+  valid_files:
+    - "EnergyBalance"
+    - "Industry"
+    - "Residential"
+    - "Tertiary"
+    - "Transport"
+version_specific:
+  "2015":
+    url: https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/JRC-IDEES/JRC-IDEES-2015_v1/
+    prefix: "JRC-IDEES-2015_All_xlsx_"
+    suffix: ".zip"
+    countries:
+      [
+        "UK",
+        "BE",
+        "BG",
+        "CZ",
+        "DK",
+        "DE",
+        "EE",
+        "IE",
+        "EL",
+        "ES",
+        "FR",
+        "HR",
+        "IT",
+        "CY",
+        "LV",
+        "LT",
+        "LU",
+        "HU",
+        "MT",
+        "NL",
+        "AT",
+        "PL",
+        "PT",
+        "RO",
+        "SI",
+        "SK",
+        "FI",
+        "SE",
+      ]
+  "2021":
+    url: https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/JRC-IDEES/JRC-IDEES-2021_v1/
+    prefix: "JRC-IDEES-2021_"
+    countries:
+      [
+        "BE",
+        "BG",
+        "CZ",
+        "DK",
+        "DE",
+        "EE",
+        "IE",
+        "EL",
+        "ES",
+        "FR",
+        "HR",
+        "IT",
+        "CY",
+        "LV",
+        "LT",
+        "LU",
+        "HU",
+        "MT",
+        "NL",
+        "AT",
+        "PL",
+        "PT",
+        "RO",
+        "SI",
+        "SK",
+        "FI",
+        "SE",
+      ]
+    suffix: ".zip"

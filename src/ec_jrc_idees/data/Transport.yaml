@@ -1,0 +1,62 @@
+prefix_cols:
+sheets:
+  TrRoad_act:
+    prefix_cols:
+    sections:
+      RoadVKM:
+        template_columns:
+          category:
+          subcategory: "Road"
+          vehicle_type:
+          units: "million km"
+          variable: "DistanceDriven"
+  TrRoad_tech:
+    prefix_cols:
+    sections:
+      RoadTotalStock:
+        template_columns:
+          category:
+          subcategory: "Road"
+          vehicle_type:
+          units: "vehicles"
+          variable: "TotalStock"
+      RoadTotalStockTestEfficiency:
+        template_columns:
+          category:
+          subcategory: "Road"
+          vehicle_type:
+          units: "kgoe per 100 km"
+          variable: "TotalStockTestEfficiency"
+      RoadTotalStockTestDiscrepancy:
+        template_columns:
+          category:
+          subcategory: "Road"
+          vehicle_type:
+          units: "ratio"
+          variable: "TotalStockTestDiscrepancy"
+      RoadNewRegistrations:
+        template_columns:
+          category:
+          subcategory: "Road"
+          vehicle_type:
+          units: "vehicles"
+          variable: "NewRegistrations"
+      RoadNewRegistrationsTestEfficiency:
+        template_columns:
+          category:
+          subcategory: "Road"
+          vehicle_type:
+          units: "kgoe per 100 km"
+          variable: "NewRegistrationsTestEfficiency"
+  TrRoad_ene:
+    prefix_cols:
+    sections:
+      RoadEnergyConsumption:
+        template_columns:
+          category:
+          subcategory: "Road"
+          vehicle_type:
+          vehicle_subtype:
+          carrier:
+          units: "ktoe"
+          variable: "TotalEnergyConsumption"
