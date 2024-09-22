@@ -27,8 +27,7 @@ def file(request, cnf):
 
 
 def test_tidy_transport(file):
-    """Transport sheets and sections should process correctly."""
-    file.prepare()
+    """Configured transport sheets and sections should process correctly."""
     file.tidy_up()
     assert all(
         isinstance(file.tidy_sheets[sheet][section], pd.DataFrame)

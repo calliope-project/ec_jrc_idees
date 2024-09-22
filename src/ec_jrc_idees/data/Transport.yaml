@@ -11,6 +11,13 @@ sheets:
           vehicle_type:
           units:
           variable: "DistanceDriven"
+      RoadVehicleTotalStock:
+        template_columns:
+          category:
+          subcategory: "Road"
+          vehicle_type:
+          units:
+          variable: "TotalStock"
   TrRoad_ene:
     prefix_cols:
     sections:
@@ -23,7 +30,3 @@ sheets:
           carrier:
           units:
           variable: "TotalEnergyConsumption"
-
-
-
-

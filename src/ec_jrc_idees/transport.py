@@ -122,11 +122,20 @@ class RoadActivityVKM(IDEESSection):
             self.check_subsection(years, agg.index)
 
 
+# Same processing as Road activity, so inheritance makes sense.
+class RoadTotalStock(RoadActivityVKM):
+    """Road activity per vehicle processing."""
+
+    NAME = "RoadVehicleTotalStock"
+    EXCEL_ROW_RANGE = (57, 82)
+    VALID_VERSIONS = (2021, 2015)
+
+
 class TrRoad_act(IDEESSheet):
     """Transport Road energy."""
 
     NAME = "TrRoad_act"
-    TARGET_SECTIONS = [RoadActivityVKM]
+    TARGET_SECTIONS = [RoadActivityVKM, RoadTotalStock]
 
     @override
     def check(self):

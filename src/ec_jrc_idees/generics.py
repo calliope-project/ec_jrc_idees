@@ -159,8 +159,8 @@ class IDEESSheet:
             )
             section_cleaner.prepare()
             section_cleaner.tidy_up()
-            section_cleaner.prettify()
             section_cleaner.check()
+            section_cleaner.prettify()
             self.tidy_sections[name] = section_cleaner.tidy_df
 
     def prettify(self) -> None:
@@ -197,8 +197,8 @@ class IDEESFile(ABC):
             sheet_cleaner = target_sheet(self.excel, self.cnf["sheets"][name])
             sheet_cleaner.prepare()
             sheet_cleaner.tidy_up()
-            sheet_cleaner.prettify()
             sheet_cleaner.check()
+            sheet_cleaner.prettify()
             self.tidy_sheets[name] = sheet_cleaner.tidy_sections
 
     def prettify(self) -> None:
