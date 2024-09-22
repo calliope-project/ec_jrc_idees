@@ -17,11 +17,9 @@ class EasyIDEES:
         self.config: dict = config["version_specific"][str(version)]
         self.config = self.config | config["generic"]
 
-    def process_files(self, dir: Path):
-        for element in dir.iterdir():
-            if element.is_file():
-                # TODO: call file processors here.
-                pass
+    def process_files(self):
+        """Call all parsing functionality."""
+        pass
 
     def download_country(self, country: str, zip: Path):
         """Download a large file from the internet."""
