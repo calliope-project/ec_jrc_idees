@@ -283,7 +283,7 @@ class TrRoad_tech(IDEESSheet):
         RoadTotalStockTestEfficiency,
         RoadTotalStockTestDiscrepancy,
         RoadNewRegistrations,
-        RoadNewRegistrationsTestEfficiency
+        RoadNewRegistrationsTestEfficiency,
     ]
 
     @override

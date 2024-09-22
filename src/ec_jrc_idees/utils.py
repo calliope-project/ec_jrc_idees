@@ -56,9 +56,7 @@ def insert_prefix_columns(data: pd.DataFrame, prefixes: dict):
 
 
 def get_style_feature(
-    style: StyleFrame,
-    feature: STYLE_FEATURES,
-    rows: pd.Index | None = None,
+    style: StyleFrame, feature: STYLE_FEATURES, rows: pd.Index | None = None
 ) -> pd.Series:
     """Search Excel style features of the first column.
 

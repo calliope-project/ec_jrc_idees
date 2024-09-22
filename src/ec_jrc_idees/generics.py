@@ -17,6 +17,7 @@ STYLE_FEATURES = Literal[
 MIN_YEAR = 2000
 MAX_YEAR = 2021
 
+
 class IDEESSection:
     """Generic IDEES section within a sheet."""
 

@@ -2,9 +2,8 @@
 
 import pandas as pd
 import pytest
-from styleframe import StyleFrame
-
 from ec_jrc_idees import utils
+from styleframe import StyleFrame
 
 
 @pytest.mark.parametrize("filename", ["JRC-IDEES-2021_Industry_DE.xlsx"])
