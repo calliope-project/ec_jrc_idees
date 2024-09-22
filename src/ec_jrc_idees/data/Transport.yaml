@@ -5,7 +5,7 @@ sheets:
     prefix_cols:
     sections:
       RoadEnergyConsumption:
-        cols:
+        template_columns:
           category:
           subcategory: "Road"
           vehicle_type:

@@ -24,14 +24,23 @@ class IDEESSection:
     def __init__(self, dirty_sheet: pd.DataFrame, style: StyleFrame, cnf: dict) -> None:
         self.cnf: dict = cnf
         self.style: StyleFrame = style
-        self.results: pd.DataFrame
         # Do a bit of pre-cleaning to make processing easier.
         self.dirty_df = (
             dirty_sheet.loc[self.get_excel_slice(self.EXCEL_ROW_RANGE)]
             .dropna(how="all", axis="columns")
             .drop("Code", axis="columns", errors="ignore")
         )
+        # Standard features to prepare
+        self.annual_df: pd.DataFrame
+        self.idees_text: pd.Series
+        # results
         self.tidy_df: pd.DataFrame
+
+    def prepare(self):
+        """Prepare features for this section."""
+        self.idees_text = self.get_idees_text_column()
+        self.annual_df = self.get_annual_dataframe()
+
 
     @abstractmethod
     def tidy_up(self):
@@ -103,7 +112,7 @@ class IDEESSection:
             if not isclose(results_sum, data_sum):
                 raise ValueError("Parsing was incorrect!")
 
-    def get_text_column(self) -> pd.Series:
+    def get_idees_text_column(self) -> pd.Series:
         """Get the text column of this section."""
         idees_text = self.dirty_df.select_dtypes("object")
         if len(idees_text.columns) > 1:
@@ -128,22 +137,20 @@ class IDEESSheet:
             excel, read_style=True, sheet_name=self.NAME
         )
         self.cnf: dict = cnf
-        self.dirty_sections: dict[str, IDEESSection] = {}
         self.tidy_sections: dict[str, pd.DataFrame] = {}
 
     def prepare(self) -> None:
-        """Prepare the section code needed for this file and version."""
-        for target_section in self.TARGET_SECTIONS:
-            name = target_section.NAME
-            self.dirty_sections[name]  = target_section(
-                self.dirty_sheet, self.style, self.cnf["sections"][name]
-            )
+        """Prepare features for this sheet, if necessary."""
+        pass
 
     def tidy_up(self) -> None:
         """Turn all sections in this sheet into machine readable data."""
-        for name, section in self.dirty_sections.items():
-            section.tidy_up()
-            self.tidy_sections[name] = section.tidy_df
+        for target_section in self.TARGET_SECTIONS:
+            name = target_section.NAME
+            dirty_section = target_section(self.dirty_sheet, self.style, self.cnf["sections"][name])
+            dirty_section.prepare()
+            dirty_section.tidy_up()
+            self.tidy_sections[name] = dirty_section.tidy_df
 
 
 class IDEESFile(ABC):
@@ -158,19 +165,18 @@ class IDEESFile(ABC):
 
         self.excel: pd.ExcelFile = pd.ExcelFile(filepath)
         self.cnf: dict = cnf
-        self.dirty_sheets: dict[str, IDEESSheet] = {}
         self.tidy_sheets: dict[str, dict[str, pd.DataFrame]] = {}
         self.metadata: Metadata = get_filename_metadata(filepath.name)
 
     def prepare(self) -> None:
-        """Prepare the sheet code needed for this file and version."""
-        for target_sheet in self.TARGET_SHEETS:
-            name = target_sheet.NAME
-            self.dirty_sheets[name] = target_sheet(self.excel, self.cnf["sheets"][name])
-            self.dirty_sheets[name].prepare()
+        """Prepare features for this file, if necessary."""
+        pass
 
     def tidy_up(self) -> None:
-        """Turn all sheets in this file into machine readable data."""
-        for name, sheet in self.dirty_sheets.items():
-            sheet.tidy_up()
-            self.tidy_sheets[name] = sheet.tidy_sections
+        """Clean all sheets configured for this file."""
+        for target_sheet in self.TARGET_SHEETS:
+            name = target_sheet.NAME
+            dirty_sheet = target_sheet(self.excel, self.cnf["sheets"][name])
+            dirty_sheet.prepare()
+            dirty_sheet.tidy_up()
+            self.tidy_sheets[name] = dirty_sheet.tidy_sections
