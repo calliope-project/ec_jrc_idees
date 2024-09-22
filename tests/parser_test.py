@@ -1,7 +1,6 @@
 """Test main functionality."""
 
 import pytest
-
 from ec_jrc_idees import parser
 
 
@@ -19,7 +18,7 @@ def downloaded_file(request, easy, tmp_path):
     return file
 
 
-@pytest.fixture
+@pytest.fixture()
 def unzipped_files(easy, downloaded_file, tmp_path):
     """Unzip dataset versions."""
     easy.unzip(downloaded_file, tmp_path)
