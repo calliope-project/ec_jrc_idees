@@ -13,11 +13,13 @@ def version(request) -> int:
     """Dataset version to parse."""
     return request.param
 
+
 @pytest.fixture
 def easy_idees(version: int) -> EasyIDEES:
     """Construct a parser per dataset year."""
     easy = EasyIDEES(version)
     return easy
+
 
 @pytest.fixture(params=["DE"])
 def country(request) -> str:
