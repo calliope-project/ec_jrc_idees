@@ -1,36 +1,16 @@
 """Test main functionality."""
 
-import pytest
+from pathlib import Path
 
-from ec_jrc_idees import parser
-
-
-@pytest.fixture(params=[2021, 2015])
-def easy(request):
-    """Construct a parser per dataset year."""
-    return parser.EasyIDEES(request.param)
+from ec_jrc_idees.parser import EasyIDEES
 
 
-@pytest.fixture(params=["DE"])
-def downloaded_file(request, easy, tmp_path):
-    """Download a country for each dataset version."""
-    file = tmp_path / "test.zip"
-    easy.download_country(request.param, file)
-    return file
+def test_zip_download(zip_path: Path):
+    """Zip file should be created successfully."""
+    assert zip_path.exists()
 
-
-@pytest.fixture
-def unzipped_files(easy, downloaded_file, tmp_path):
-    """Unzip dataset versions."""
-    easy.unzip(downloaded_file, tmp_path)
-    return tmp_path
-
-
-def test_download(downloaded_file):
-    """Country downloads should work as expected."""
-    assert downloaded_file.exists()
-
-
-def test_unzip(unzipped_files):
-    """Unzipping should work as expected."""
-    assert unzipped_files.iterdir() is not None
+def test_unzip(easy_idees: EasyIDEES, country_path: Path):
+    """Unzipped files should be excels with the right versioning."""
+    unzipped_files = [path for path in country_path.iterdir() if path.is_file()]
+    assert all([".xlsx" in file.name for file in unzipped_files])
+    assert all([str(easy_idees.version) in file.name for file in unzipped_files ])

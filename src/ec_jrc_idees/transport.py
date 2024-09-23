@@ -1,6 +1,6 @@
 """Processing of transport files."""
 
-from typing import NamedTuple, override
+from typing import NamedTuple, override  # type: ignore
 
 import pandas as pd
 from styleframe import StyleFrame

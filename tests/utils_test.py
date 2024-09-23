@@ -49,10 +49,10 @@ def test_prefix_columns(prefix):
 
 
 @pytest.mark.parametrize(("feature", "expected"), [("indent", set(range(0, 6)))])
-def test_style(feature, expected):
+def test_style(country_path, version, feature, expected):
     """Style feature extraction should work."""
     style = StyleFrame.read_excel(
-        "tests/files/JRC-IDEES-2021_Industry_DE.xlsx",
+        country_path / f"JRC-IDEES-{version}_Industry_DE.xlsx",
         read_style=True,
         sheet_name="NFM_emi",
     )

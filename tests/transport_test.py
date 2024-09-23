@@ -10,20 +10,21 @@ from ec_jrc_idees.transport import TransportFile
 
 
 @pytest.fixture
-def cnf():
-    """Config."""
-    return yaml.safe_load(Path("src/ec_jrc_idees/data/Transport.yaml").read_text())
+def transport_cnf() -> dict:
+    """Get internal transport configuration."""
+    return yaml.safe_load(Path("src/ec_jrc_idees/config/Transport.yaml").read_text())
 
 
-@pytest.fixture(
-    params=[
-        "tests/files/JRC-IDEES-2021_Transport_DE.xlsx",
-        "tests/files/JRC-IDEES-2015_Transport_DE.xlsx",
-    ]
-)
-def file(request, cnf):
-    """Test Transport file versions."""
-    return TransportFile(request.param, cnf)
+@pytest.fixture
+def transport_file(country_path, country, version) -> Path:
+    """Get stable transport filepath."""
+    return country_path / f"JRC-IDEES-{version}_Transport_{country}.xlsx"
+
+
+@pytest.fixture
+def file(transport_file, transport_cnf):
+    """Enable transport file testing."""
+    return TransportFile(transport_file, transport_cnf)
 
 
 def test_tidy_transport(file):
