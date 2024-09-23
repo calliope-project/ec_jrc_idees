@@ -5,8 +5,7 @@ This package makes reading JRC - IDEES data simple by:
 - Transforming data into a tidy format.
 - Making names readable.
 
-
-# Credit
+## Credit
 
 >[!NOTE]
 >JRC - IDEES is a dataset created by the Joint Research Centre of the European Commission, accessible [here](https://publications.jrc.ec.europa.eu/repository/handle/JRC137809).

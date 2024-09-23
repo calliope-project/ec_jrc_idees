@@ -747,7 +747,7 @@ packages:
   name: ec-jrc-idees
   version: 0.1.0
   path: .
-  sha256: 03b4a93189530b5323bb1c49573c51c3387e6c88e59b81e02e1f6bd27f2baa43
+  sha256: 74c96b6e8cb637bb61fc267c1280e49e579a620448d987e2ed8fafdbc12a8bb2
   requires_dist:
   - styleframe>=4.2,<5
   requires_python: '>=3.12'

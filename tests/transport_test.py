@@ -5,10 +5,11 @@ from pathlib import Path
 import pandas as pd
 import pytest
 import yaml
+
 from ec_jrc_idees.transport import TransportFile
 
 
-@pytest.fixture()
+@pytest.fixture
 def cnf():
     """Config."""
     return yaml.safe_load(Path("src/ec_jrc_idees/data/Transport.yaml").read_text())

@@ -1,14 +1,21 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=70.0"]
+
 [project]
 name = "ec_jrc_idees"
 version = "0.1.0"
-description = "Easy JRC-IDEES data!"
-authors = [{name = "Ivan Ruiz Manuel", email = "72193617+irm-codebase@users.noreply.github.com"}]
+description = "Easy JRC-IDEES data: tidy, organised and maintainable!"
+authors = [{name = "Ivan Ruiz Manuel", email = "i.ruizmanuel@tudelft.nl"}]
 requires-python = ">= 3.12"
+readme = "README.md"
 dependencies = ["styleframe>=4.2,<5"]
+license = {file = "LICENSE"}
 
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+[project.urls]
+Homepage = "https://github.com/calliope-project/ec_jrc_idees"
+Repository = "https://github.com/calliope-project/ec_jrc_idees"
+Issues = "https://github.com/calliope-project/ec_jrc_idees/issues"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -47,6 +54,7 @@ default = { solve-group = "default" }
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "Q", "W", "D", "PT", "PL", "PD", "C90", "UP"]
+exclude = [".eggs", ".pixi", ".ruff_cache"]
 
 [tool.ruff.lint.isort]
 split-on-trailing-comma = false
