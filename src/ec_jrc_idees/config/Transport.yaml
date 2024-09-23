@@ -1,62 +1,108 @@
-prefix_cols:
+validation:
+  expected:
+    category:
+      - Passenger
+      - Freight
+    subcategory:
+      - Road
+    vehicle_type:
+      - Powered two-wheelers
+      - Passenger cars
+      - Motor coaches, buses and trolley buses
+      - Light commercial vehicles
+      - Heavy goods vehicles
+    vehicle_subtype:
+      - Gasoline engine
+      - Diesel oil engine
+      - LPG engine
+      - Natural gas engine
+      - Plug-in hybrid electric
+      - Battery electric vehicles
+      - Domestic
+      - International
+  optional:
+    carrier:
+      - Gasoline
+      - Diesel
+      - Natural gas
+      - LPG
+      - Electricity
+remap:
+  category: {"Passenger transport": "Passenger", "Freight transport": "Freight"}
+  vehicle_type: {"Powered 2-wheelers": "Powered two-wheelers"}
 sheets:
   TrRoad_act:
     prefix_cols:
     sections:
       RoadVKM:
+        variable: "DistanceDriven"
+        units:
+          idees: "mio km"
+          tidy: "million km"
         template_columns:
           category:
           subcategory: "Road"
           vehicle_type:
-          units: "million km"
-          variable: "DistanceDriven"
+          vehicle_subtype:
   TrRoad_tech:
     prefix_cols:
     sections:
       RoadTotalStock:
+        variable: "TotalStock"
+        units:
+          idees: "vehicles"
         template_columns:
           category:
           subcategory: "Road"
           vehicle_type:
-          units: "vehicles"
-          variable: "TotalStock"
+          vehicle_subtype:
       RoadTotalStockTestEfficiency:
+        units:
+          idees: "kgoe/100 km"
+        variable: "TotalStockTestEfficiency"
         template_columns:
           category:
           subcategory: "Road"
           vehicle_type:
-          units: "kgoe per 100 km"
-          variable: "TotalStockTestEfficiency"
+          vehicle_subtype:
       RoadTotalStockTestDiscrepancy:
+        units:
+          idees: "ratio"
+        variable: "TotalStockTestDiscrepancy"
         template_columns:
           category:
           subcategory: "Road"
           vehicle_type:
-          units: "ratio"
-          variable: "TotalStockTestDiscrepancy"
+          vehicle_subtype:
       RoadNewRegistrations:
+        units:
+         idees:
+         tidy: "vehicles"
+        variable: "NewRegistrations"
         template_columns:
           category:
           subcategory: "Road"
           vehicle_type:
-          units: "vehicles"
-          variable: "NewRegistrations"
+          vehicle_subtype:
       RoadNewRegistrationsTestEfficiency:
+        units:
+          idees: "kgoe/100 km"
+        variable: "NewRegistrationsTestEfficiency"
         template_columns:
           category:
           subcategory: "Road"
           vehicle_type:
-          units: "kgoe per 100 km"
-          variable: "NewRegistrationsTestEfficiency"
+          vehicle_subtype:
   TrRoad_ene:
     prefix_cols:
     sections:
       RoadEnergyConsumption:
+        units:
+          idees: "ktoe"
+        variable: "TotalEnergyConsumption"
         template_columns:
           category:
           subcategory: "Road"
           vehicle_type:
           vehicle_subtype:
           carrier:
-          units: "ktoe"
-          variable: "TotalEnergyConsumption"

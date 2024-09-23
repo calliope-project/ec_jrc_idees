@@ -67,7 +67,7 @@ class RoadSection(IDEESSection):
     """Adds generic calculations specific to Road transport."""
 
     @override
-    def check(self):
+    def specific_check(self):
         years = self.annual_df.columns
         aggregates = [
             get_total_aggregates(self.idees_text, self.style),
@@ -124,7 +124,7 @@ class RoadSectionNoCarrierNoAggregates(RoadSectionNoCarriers):
     """Generic data extraction for no carrier sections without aggregates."""
 
     @override
-    def check(self):
+    def specific_check(self):
         # Sections with ratios or rates have no aggregates for testing.
         # Instead, rely on their matching shape with other sections and
         # check that all gathered values can be interpreted as numeric.
@@ -256,22 +256,12 @@ class TrRoad_act(IDEESSheet):
     SHEET_NAME = "TrRoad_act"
     SECTION_CLEANERS = [RoadVKM]
 
-    @override
-    def check(self):
-        # TODO: add checks once all transport files are processed.
-        pass
-
 
 class TrRoad_ene(IDEESSheet):
     """Transport Road energy."""
 
     SHEET_NAME = "TrRoad_ene"
     SECTION_CLEANERS = [RoadEnergyConsumption]
-
-    @override
-    def check(self):
-        # TODO: add checks once all transport files are processed.
-        pass
 
 
 class TrRoad_tech(IDEESSheet):
@@ -285,11 +275,6 @@ class TrRoad_tech(IDEESSheet):
         RoadNewRegistrations,
         RoadNewRegistrationsTestEfficiency,
     ]
-
-    @override
-    def check(self):
-        # TODO: add checks once all transport files are processed.
-        pass
 
 
 class TransportFile(IDEESFile):

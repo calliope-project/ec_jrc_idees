@@ -8,26 +8,26 @@ import pytest
 from ec_jrc_idees.parser import EasyIDEES
 
 
-@pytest.fixture(params=[2021, 2015])
+@pytest.fixture(params=[2021, 2015], scope="session")
 def version(request) -> int:
     """Dataset version to parse."""
     return request.param
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def easy_idees(version: int) -> EasyIDEES:
     """Construct a parser per dataset year."""
     easy = EasyIDEES(version)
     return easy
 
 
-@pytest.fixture(params=["DE"])
+@pytest.fixture(params=["DE"], scope="session")
 def country(request) -> str:
     """Select the country to process."""
     return request.param
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def zip_path(easy_idees: EasyIDEES, country: str):
     """Download zip file for this country and version."""
     version = easy_idees.version
@@ -40,7 +40,7 @@ def zip_path(easy_idees: EasyIDEES, country: str):
     return zipfile
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def country_path(easy_idees: EasyIDEES, zip_path: Path, country: str) -> Path:
     """Folder where all country files are placed."""
     country_dir = zip_path.parent / f"{country}"

@@ -22,20 +22,33 @@ def test_filename_metadata(filename):
 
 
 @pytest.mark.parametrize(
-    ("text", "expected"),
+    ("text", "expected", "method"),
     [
-        ("Stock of vehicles - total (vehicles)", "vehicles"),
-        ("CO2 emissions (kt CO2)", "kt_co2"),
-        ("something subsector (kt of CO2)", "kt_co2"),
-        ("Market shares (%)", "%"),
-        ("Emission intensity (kt of CO2 / ktoe)", "kt_co2_per_ktoe"),
-        ("yadda (toe useful/t of output) yadda", "toe_useful_per_t_output"),
-        ("thing (toe useful / t of output)", "toe_useful_per_t_output"),
+        ("Stock of vehicles - total (vehicles)", "vehicles", "()"),
+        ("CO2 emissions [kt CO2]", "kt CO2", "[]"),
+        ("Emission intensity <kt of CO2 / ktoe>", "kt of CO2 / ktoe", "<>"),
+        ("yadda (toe useful/t of output) yadda", "toe useful/t of output", "()"),
     ],
 )
-def test_unit_extraction(text, expected):
+def test_unit_extraction(text, expected, method):
     """Units within a cell should be cleaned approprietly."""
-    assert utils.get_unit_in_parenthesis(text) == expected
+    assert utils.get_units_in_brackets(text, method) == expected
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("vehicles", "vehicles"),
+        ("kt CO2", "kt co2"),
+        ("kt of CO2", "kt co2"),
+        ("%", "%"),
+        ("kt of CO2 / ktoe", "kt co2 per ktoe"),
+        ("toe useful/t of output", "toe useful per t output"),
+        ("toe useful / t of output", "toe useful per t output"),
+    ],
+)
+def test_unit_standardisation(text, expected):
+    """Unit standardisation should make units slightly more readable."""
 
 
 @pytest.mark.parametrize("prefix", [{"foo": "bar", "empty": ""}])
