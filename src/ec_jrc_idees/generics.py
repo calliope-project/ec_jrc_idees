@@ -17,7 +17,6 @@ STYLE_FEATURES = Literal[
 ]
 
 
-
 class IDEESSection:
     """Generic IDEES section within a sheet."""
 
@@ -211,12 +210,12 @@ class IDEESSheet:
             template_columns = {name: Column(str) for name in cnf["template_columns"]}
             data_columns = {
                 "year": Column(int, checks=Check.isin(expected_years)),
-                variable_col: Column(float, nullable=True)
+                variable_col: Column(float, nullable=True),
             }
             schema = DataFrameSchema(
                 columns=template_columns | data_columns,
                 index=Index(int, unique=True),
-                ordered=True
+                ordered=True,
             )
             schema.validate(tidy_df)
 

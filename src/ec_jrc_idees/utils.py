@@ -16,6 +16,7 @@ MIN_YEAR = 2000
 MAX_YEAR_V1 = 2015
 MAX_YEAR_V2 = 2021
 
+
 class Metadata(NamedTuple):
     """Contains important details contained in the filename."""
 

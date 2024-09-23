@@ -34,6 +34,7 @@ def test_unit_extraction(text, expected, method):
     """Units within a cell should be cleaned approprietly."""
     assert utils.get_units_in_brackets(text, method) == expected
 
+
 @pytest.mark.parametrize(
     ("text", "expected"),
     [
@@ -48,6 +49,7 @@ def test_unit_extraction(text, expected, method):
 )
 def test_unit_standardisation(text, expected):
     """Unit standardisation should make units slightly more readable."""
+
 
 @pytest.mark.parametrize("prefix", [{"foo": "bar", "empty": ""}])
 def test_prefix_columns(prefix):
