@@ -6,16 +6,16 @@ from pathlib import Path
 from typing import Literal
 
 import pandas as pd
+from pandera import Check, Column, DataFrameSchema, Index
 from styleframe import StyleFrame
 
-from ec_jrc_idees.utils import Metadata, get_filename_metadata
+from ec_jrc_idees import utils
+from ec_jrc_idees.utils import Metadata
 
 STYLE_FEATURES = Literal[
     "bg_color", "bold", "font_color", "underline", "border_type", "indent"
 ]
 
-MIN_YEAR = 2000
-MAX_YEAR = 2021
 
 
 class IDEESSection:
@@ -25,7 +25,7 @@ class IDEESSection:
     VALID_VERSIONS: tuple[int, ...]
 
     def __init__(self, dirty_sheet: pd.DataFrame, style: StyleFrame, cnf: dict) -> None:
-        self.cnf: dict = cnf
+        self.cnf: dict[str, dict] = cnf
         self.style: StyleFrame = style
         # Do a bit of pre-cleaning to make processing easier.
         self.dirty_df = (
@@ -48,13 +48,35 @@ class IDEESSection:
     def tidy_up(self):
         """Process section."""
 
-    @abstractmethod
-    def check(self):
+    def generic_check(self):
         """Run validation for this section."""
+        if "(" in self.idees_text.iloc[0]:
+            units = utils.get_units_in_brackets(self.idees_text.iloc[0])
+        else:
+            units = None
+        expected_units = self.cnf["units"]["idees"]
+        if units != expected_units:
+            raise ValueError(f"Unit mismatch: got '{units}', not '{expected_units}'")
+
+    @abstractmethod
+    def specific_check(self):
+        """Run tailored checks for this section."""
 
     def prettify(self) -> None:
         """Rename and standardise stuff, if necessary."""
-        pass
+        units = self.cnf["units"].get("tidy")
+        if not units:
+            units = utils.standardize_unit(self.cnf["units"]["idees"])
+        assert units, "Units cannot be empty."
+        self.tidy_df = pd.melt(
+            self.tidy_df,
+            id_vars=list(self.cnf["template_columns"].keys()),
+            value_vars=self.annual_df.columns.to_list(),
+            var_name="year",
+            value_name=f"{self.cnf['variable']} [{units}]",
+        )
+        # The cleaning should've made object inferring easy.
+        self.tidy_df = self.tidy_df.infer_objects()
 
     def get_excel_slice(self, excel_rows: tuple[int, int]):
         """Get a dataframe section based on excel numbers."""
@@ -128,8 +150,6 @@ class IDEESSection:
     def get_annual_dataframe(self) -> pd.DataFrame:
         """Get yearly data in this section."""
         annual_df = self.dirty_df.iloc[:, 1:]
-        if not all([MIN_YEAR <= i and i <= MAX_YEAR for i in annual_df.columns]):
-            raise ValueError("Second to last columns should be years.")
         return annual_df
 
 
@@ -146,7 +166,7 @@ class IDEESSheet:
         )
         self.cnf: dict = cnf
         self.tidy_sections: dict[str, pd.DataFrame] = {}
-        self.metadata: Metadata = get_filename_metadata(str(Path(str(excel.io)).name))
+        self.metadata: Metadata = utils.get_filename_metadata(str(excel.io))
         self.section_cleaners: dict[str, type[IDEESSection]] = {
             _class.__name__: _class for _class in self.SECTION_CLEANERS
         }
@@ -166,7 +186,8 @@ class IDEESSheet:
             )
             section_cleaner.prepare()
             section_cleaner.tidy_up()
-            section_cleaner.check()
+            section_cleaner.generic_check()
+            section_cleaner.specific_check()
             section_cleaner.prettify()
             self.tidy_sections[name] = section_cleaner.tidy_df
 
@@ -174,9 +195,30 @@ class IDEESSheet:
         """Rename and standardise stuff, if necessary."""
         pass
 
-    @abstractmethod
     def check(self):
-        """Run validation for this sheet."""
+        """Run validation for this sheet.
+
+        By default:
+        - Check that template columns are present and in order.
+        - Check that that all expected years are present.
+        """
+        expected_years = utils.get_expected_years(self.metadata)
+
+        for name, tidy_df in self.tidy_sections.items():
+            cnf = self.cnf["sections"][name]
+            unit = utils.get_units_in_brackets(tidy_df.columns[-1], brackets="[]")
+            variable_col = f"{cnf['variable']} [{unit}]"
+            template_columns = {name: Column(str) for name in cnf["template_columns"]}
+            data_columns = {
+                "year": Column(int, checks=Check.isin(expected_years)),
+                variable_col: Column(float, nullable=True)
+            }
+            schema = DataFrameSchema(
+                columns=template_columns | data_columns,
+                index=Index(int, unique=True),
+                ordered=True
+            )
+            schema.validate(tidy_df)
 
 
 class IDEESFile(ABC):
@@ -190,7 +232,7 @@ class IDEESFile(ABC):
         self.excel: pd.ExcelFile = pd.ExcelFile(filepath)
         self.cnf: dict = cnf
         self.tidy_sheets: dict[str, dict[str, pd.DataFrame]] = {}
-        self.metadata: Metadata = get_filename_metadata(filepath.name)
+        self.metadata: Metadata = utils.get_filename_metadata(filepath.name)
         self.available_sheets: dict[str, type[IDEESSheet]] = {
             _class.__name__: _class for _class in self.SHEET_CLEANERS
         }

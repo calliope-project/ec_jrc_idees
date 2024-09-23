@@ -22,8 +22,16 @@ class Section(IDEESSection):
         self.tidy_df = DUMMY_TIDY_DF
 
     @override
-    def check(self):
-        return True
+    def specific_check(self):
+        pass
+
+    @override
+    def generic_check(self):
+        pass
+
+    @override
+    def prettify(self) -> None:
+        pass
 
 
 class Sheet(IDEESSheet):
@@ -34,7 +42,7 @@ class Sheet(IDEESSheet):
 
     @override
     def check(self):
-        return True
+        pass
 
 
 class File(IDEESFile):
@@ -44,7 +52,7 @@ class File(IDEESFile):
 
     @override
     def check(self):
-        return True
+        pass
 
 
 @pytest.fixture
