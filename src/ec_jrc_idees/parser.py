@@ -12,17 +12,22 @@ class EasyIDEES:
     """Easily process JRC-IDEES DATA."""
 
     def __init__(self, version: str | int) -> None:
-        data_path = importlib.resources.files("ec_jrc_idees") / "data" / "parser.yaml"
-        config = yaml.safe_load(data_path.read_text())
-        self.config: dict = config["version_specific"][str(version)]
-        self.config = self.config | config["generic"]
+        config_path = importlib.resources.files("ec_jrc_idees") / "config/parser.yaml"
+        config = yaml.safe_load(config_path.read_text())
+        self.version: int = int(version)
+        self.config: dict = config["version_specific"][str(version)] | config["generic"]
 
-    def process_files(self):
+    def process_country(self):
         """Call all parsing functionality."""
         pass
 
-    def download_country(self, country: str, zip: Path):
+    def download_country(self, country: str, zip: str | Path, overwrite: bool = False):
         """Download a large file from the internet."""
+        zip = Path(zip)
+        if zip.exists():
+            if not overwrite:
+                raise ValueError("Requested zip file already exists!")
+            zip.unlink()
         url = self.config["url"]
         filename = self.config["prefix"] + country + self.config["suffix"]
         response = requests.get(url + filename, stream=True)
