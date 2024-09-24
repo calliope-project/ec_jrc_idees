@@ -5,6 +5,7 @@ from typing import Literal, NamedTuple
 
 import inflection
 import pandas as pd
+import pycountry
 from styleframe import StyleFrame
 
 STYLE_FEATURES = Literal[
@@ -15,6 +16,7 @@ BRACKETS = Literal["()", "[]", "<>"]
 MIN_YEAR = 2000
 MAX_YEAR_V1 = 2015
 MAX_YEAR_V2 = 2021
+EU_CODE_LENGTH = 2
 
 
 class Metadata(NamedTuple):
@@ -83,3 +85,20 @@ def get_expected_years(metadata: Metadata) -> list[int]:
     else:
         raise ValueError(f"Invalid version configured: '{metadata.version}'")
     return list(range(MIN_YEAR, max_year + 1))
+
+
+def convert_eu_code_to_alpha3(eu_code: str):
+    """Convert EU country code to ISO 3166 alpha 3.
+
+    The European Union uses its own country codes which not always match ISO 3166.
+    """
+    if len(eu_code) != EU_CODE_LENGTH:
+        raise ValueError(f"EU country codes are of length 2, yours is '{eu_code}'.")
+
+    match eu_code:
+        case "EL":
+            eu_code = "GR"
+        case "UK":
+            eu_code = "GB"
+    lookup = pycountry.countries.lookup(eu_code)
+    return lookup.alpha_3
