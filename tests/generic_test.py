@@ -44,6 +44,10 @@ class Sheet(IDEESSheet):
     def check(self):
         pass
 
+    @override
+    def prettify(self):
+        pass
+
 
 class File(IDEESFile):
     """Dummy file functionality."""
@@ -52,6 +56,10 @@ class File(IDEESFile):
 
     @override
     def check(self):
+        pass
+
+    @override
+    def prettify(self):
         pass
 
 

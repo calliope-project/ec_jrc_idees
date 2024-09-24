@@ -71,3 +71,13 @@ def test_style(country_path, version, feature, expected):
     )
     values = utils.get_style_feature(style, feature)
     assert not set(values.unique()) - expected
+
+
+@pytest.mark.parametrize(
+    ("eu_code", "expected"),
+    [("EL", "GRC"), ("UK", "GBR"), ("PT", "PRT"), ("MD", "MDA")],
+)
+def test_country_names(eu_code, expected):
+    """Country codes should be in alpha3 format for maximum compatibility."""
+    result = utils.convert_eu_code_to_alpha3(eu_code)
+    assert result == expected

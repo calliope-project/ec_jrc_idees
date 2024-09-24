@@ -192,7 +192,14 @@ class IDEESSheet:
 
     def prettify(self) -> None:
         """Rename and standardise stuff, if necessary."""
-        pass
+        metadata = self.metadata
+        for tidy_df in self.tidy_sections.values():
+            prefixes = {
+                "version": metadata.version,
+                "sector": metadata.file,
+                "country": utils.convert_eu_code_to_alpha3(metadata.country_eurostat),
+            }
+            utils.insert_prefix_columns(tidy_df, prefixes)
 
     def check(self):
         """Run validation for this sheet.
